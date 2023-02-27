@@ -11,16 +11,7 @@ node {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
 
-        app = docker.build("getintodevops/hellonode")
-    }
-
-    stage('Test image') {
-        /* Ideally, we would run a test framework against our image.
-         * For this example, we're using a Volkswagen-type approach ;-) */
-
-        app.inside {
-            sh 'echo "Tests passed"'
-        }
+        app = docker.build("fabianwinkelmann2001/hellonode")
     }
 
     stage('Push image') {
@@ -29,7 +20,6 @@ node {
          * Second, the 'latest' tag.
          * Pushing multiple tags is cheap, as all the layers are reused. */
         docker.withRegistry('https://registry.hub.docker.com', '') {
-            app.push("${env.BUILD_NUMBER}")
             app.push("latest")
         }
     }
