@@ -1,16 +1,15 @@
+def remote = [:]
+remote.name = "test"
+remote.host = "159.69.108.3"
+remote.allowAnyHosts = true
+
 node {
     def app
-
-    stage('Clone repository') {
-        /* Let's make sure we have the repository cloned to our workspace */
-
-        checkout scm
-    }
 
     stage('Build image') {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
-
+        checkout scm
         app = docker.build("fabianwinkelmann2001/app")
     }
 
@@ -23,4 +22,13 @@ node {
             app.push("latest")
         }
     }
+    
+    withCredentials([sshUserPrivateKey(credentialsId: 'server', keyFileVariable: 'identity', passphraseVariable: '', usernameVariable: 'root')]) {
+        remote.user = root
+        remote.identityFile = identity
+        stage("SSH Steps Rocks!") {
+            sshCommand remote: remote, command: 'docker-compose -f /home/nodejs-basic/docker-compose.yml up -d --build'
+        }
+    }
+    
 }
